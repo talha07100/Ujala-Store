@@ -9,3 +9,10 @@ UJALA STORE - FIXED BUILD
 7. Browser mein hard refresh: Ctrl+Shift+R.
 
 Fix in this build: duplicate renderPublic() declaration removed; duplicate declaration could stop the module JavaScript from running, leaving the setup banner visible and buttons unresponsive.
+
+
+IMPORTANT FIX IN THIS VERSION:
+- Fixed the JavaScript initialization order: the original file called $() before declaring const $, which stopped the entire script and made Admin Login appear unresponsive.
+- After uploading this index.html, commit the change and hard-refresh the live site (Ctrl+Shift+R).
+- Login uses Google popup and only the Gmail in index.html (OWNER_EMAIL) is allowed to manage products.
+- Product image uploads still require Firebase Storage to be enabled for the project; if Firebase asks for a billing-plan upgrade, image upload will not work on the current plan.

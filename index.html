@@ -67,14 +67,14 @@ const firebaseConfig = {
 };
 const OWNER_EMAIL = "talhakhan14746@gmail.com";
 const isConfigured = firebaseConfig.apiKey !== "PASTE_API_KEY" && firebaseConfig.projectId !== "PASTE_PROJECT_ID";
+const $ = id => document.getElementById(id);
+$("year").textContent = new Date().getFullYear();
+
 // Keep Admin Login responsive even if Firebase initialization/configuration fails.
 $("loginBtn").onclick = () => {
   show("loginArea", true);
   if (!isConfigured) msg("Firebase config add karna baqi hai. Updated index.html GitHub par publish karein.");
 };
-
-const $ = id => document.getElementById(id);
-$("year").textContent = new Date().getFullYear();
 let app,auth,db,storage,currentUser=null,isAdmin=false,products=[],reviews={},stopProducts=null,stopReviews=null,selectedReviewProduct=null;
 const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const money = n => "Rs. "+Number(n||0).toLocaleString("en-PK");
@@ -85,7 +85,7 @@ if(isConfigured){
  try{
   app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app);storage=getStorage(app);
   $("setupNotice").classList.add("hidden");
-  $("loginBtn").addEventListener("click",()=>show("loginArea"));
+  $("loginBtn").addEventListener("click",()=>{show("loginArea",true); $("loginArea").scrollIntoView({behavior:"smooth",block:"center"});});
   $("googleLogin").addEventListener("click",async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){msg("Login error: "+e.message,"error")}});
   $("logoutBtn").addEventListener("click",()=>signOut(auth));
   onAuthStateChanged(auth,user=>{
@@ -95,7 +95,12 @@ if(isConfigured){
    if(user&&!isAdmin){$("loginBtn").classList.add("hidden");$("userLabel").textContent=user.email+" (not authorized)";msg("Yeh Gmail admin ke liye authorized nahi hai.","error");show("loginArea",true)}
    if(isAdmin){$("adminEmail").textContent=user.email;listenProducts()}else{if(stopProducts)stopProducts();listenPublicProducts()}
   });
- }catch(e){$("setupNotice").textContent="Firebase setup error: "+e.message}
+ }catch(e){
+  $("setupNotice").textContent="Firebase setup error: "+e.message;
+  $("setupNotice").classList.remove("hidden");
+  console.error("Ujala Store Firebase initialization error:", e);
+  $("loginBtn").onclick=()=>{show("loginArea",true);msg("Firebase setup error: "+e.message,"error")};
+ }
 }else{
  $("loginBtn").addEventListener("click",()=>{show("loginArea");msg("Pehle README ke mutabiq Firebase config add karein.")});
  $("googleLogin").addEventListener("click",()=>msg("Firebase config abhi add nahi hui. README file follow karein."));
