@@ -25,3 +25,10 @@ MULTI-PHOTO UPDATE:
 - Images larger than 900 KB are resized to a maximum 1800px side and compressed to JPEG in the browser. The previous 5MB hard limit was removed.
 - Product detail pages show all saved photos. Existing single-photo products remain supported.
 - Compression cannot bypass Firebase Storage plan/billing restrictions. If uploads fail with a Firebase Storage billing/permission error, enable Storage or configure alternative image hosting.
+
+
+SAVE + BUY BUTTON FIX:
+- Product text/details are saved to Firestore BEFORE trying image uploads, so a Storage upload/billing error no longer prevents the product itself from being saved.
+- If photo upload fails, the alert explains that the product saved but images did not.
+- Added Buy Now buttons to product cards and detail pages. Configure WHATSAPP_NUMBER near OWNER_EMAIL in index.html using country code and digits only, e.g. 923001234567 (replace with your actual store number).
+- Firebase Storage is still required for hosted image uploads; this change does not bypass Firebase billing or Storage rules.

@@ -66,6 +66,8 @@ const firebaseConfig = {
   appId: "1:893299030945:web:0c96c6ccc89514bc7969e0"
 };
 const OWNER_EMAIL = "talhakhan14746@gmail.com";
+// Set this to the store's WhatsApp number in international digits, without + or spaces.
+const WHATSAPP_NUMBER = "923XXXXXXXXX";
 const isConfigured = firebaseConfig.apiKey !== "PASTE_API_KEY" && firebaseConfig.projectId !== "PASTE_PROJECT_ID";
 const $ = id => document.getElementById(id);
 $("year").textContent = new Date().getFullYear();
@@ -115,12 +117,19 @@ function listenProducts(){
  if(stopProducts)stopProducts();
  stopProducts=onSnapshot(collection(db,"products"),snap=>{products=snap.docs.map(d=>({id:d.id,...d.data()}));renderPublic();renderAdminProducts()},e=>console.error(e));
 }
+function buyProduct(id){
+ const p=products.find(x=>x.id===id); if(!p)return;
+ if(!/^92\\d{10}$/.test(WHATSAPP_NUMBER)){alert("Buy Now enable karne ke liye index.html mein WHATSAPP_NUMBER ko apne WhatsApp number se replace karein. Misal: 923001234567");return;}
+ const message=`Assalam-o-Alaikum, mujhe yeh product order karna hai:\\nProduct: ${p.name}\\nPrice: ${money(p.price)}\\nDescription: ${p.description||""}\\nWebsite: ${location.href}`;
+ window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`,"_blank","noopener");
+}
 function renderPublic(){
  const term=($("searchBox")?.value||"").toLowerCase();
  const filtered=products.filter(p=>(p.name||"").toLowerCase().includes(term)||(p.description||"").toLowerCase().includes(term));
  $("productCount").textContent=filtered.length+" products";
- $("publicProducts").innerHTML=filtered.length?filtered.map(p=>`<article class="card"><img class="photo" src="${escapeHtml((p.photoURLs?.[0]||p.photoURL||defaultPhoto()))}" alt="${escapeHtml(p.name)}"><div class="cardbody"><div class="price">${money(p.price)}</div><h3>${escapeHtml(p.name)}</h3><p class="muted">${escapeHtml((p.description||"").slice(0,105))}${(p.description||"").length>105?"…":""}</p><button data-detail="${p.id}">View Product & Reviews</button></div></article>`).join(""):'<p class="muted">Abhi koi product add nahi hua.</p>';
+ $("publicProducts").innerHTML=filtered.length?filtered.map(p=>`<article class="card"><img class="photo" src="${escapeHtml((p.photoURLs?.[0]||p.photoURL||defaultPhoto()))}" alt="${escapeHtml(p.name)}"><div class="cardbody"><div class="price">${money(p.price)}</div><h3>${escapeHtml(p.name)}</h3><p class="muted">${escapeHtml((p.description||"").slice(0,105))}${(p.description||"").length>105?"…":""}</p><div class="row"><button data-detail="${p.id}">View Product & Reviews</button><button class="secondary" data-buy="${p.id}">Buy Now</button></div></div></article>`).join(""):'<p class="muted">Abhi koi product add nahi hua.</p>';
  $("publicProducts").querySelectorAll("[data-detail]").forEach(b=>b.onclick=()=>openDetail(b.dataset.detail));
+ $("publicProducts").querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>buyProduct(b.dataset.buy));
 }
 $("searchBox").addEventListener("input",renderPublic);
 function renderAdminProducts(){
@@ -163,20 +172,29 @@ $("productForm").addEventListener("submit",async e=>{
   const id=$("productId").value;
   const existing=products.find(p=>p.id===id);
   let photoURLs=Array.isArray(existing?.photoURLs)?[...existing.photoURLs]:(existing?.photoURL?[existing.photoURL]:[]);
+  const data={name:$("pName").value.trim(),price:Number($("pPrice").value),description:$("pDesc").value.trim(),photoURL:photoURLs[0]||"",photoURLs,updatedAt:serverTimestamp()};
+  // Save product details first. Storage problems must not prevent saving the product itself.
+  let productId=id;
+  if(id) await setDoc(doc(db,"products",id),data,{merge:true});
+  else {const created=await addDoc(collection(db,"products"),{...data,createdAt:serverTimestamp()});productId=created.id;}
+  let photoWarning="";
   const files=[...($("pPhoto").files||[])];
   if(files.length){
-    for(let i=0;i<files.length;i++){
-      const file=await compressImageFile(files[i]);
-      const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
-      const storageRef=ref(storage,"products/"+Date.now()+"_"+i+"_"+safe);
-      await uploadBytes(storageRef,file,{contentType:file.type});
-      photoURLs.push(await getDownloadURL(storageRef));
+    try {
+      for(let i=0;i<files.length;i++){
+        const file=await compressImageFile(files[i]);
+        const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+        const storageRef=ref(storage,"products/"+Date.now()+"_"+i+"_"+safe);
+        await uploadBytes(storageRef,file,{contentType:file.type});
+        photoURLs.push(await getDownloadURL(storageRef));
+      }
+      await setDoc(doc(db,"products",productId),{photoURL:photoURLs[0]||"",photoURLs,updatedAt:serverTimestamp()},{merge:true});
+    } catch(photoErr) {
+      console.error("Photo upload failed:",photoErr);
+      photoWarning=" Product save ho gaya, lekin photos upload nahi huin. Firebase Storage enable/billing ya Storage Rules check karein. Error: "+photoErr.message;
     }
   }
-  const photoURL=photoURLs[0]||"";
-  const data={name:$("pName").value.trim(),price:Number($("pPrice").value),description:$("pDesc").value.trim(),photoURL,photoURLs,updatedAt:serverTimestamp()};
-  if(id)await setDoc(doc(db,"products",id),data,{merge:true});else await addDoc(collection(db,"products"),{...data,createdAt:serverTimestamp()});
-  resetProductForm();alert("Product save ho gaya.");
+  resetProductForm();alert("Product save ho gaya."+photoWarning);
  }catch(err){alert("Save nahi ho saka: "+err.message)}finally{btn.disabled=false;btn.textContent=$("productId").value?"Update Product":"Save Product"}
 });
 async function removeProduct(id){
@@ -197,7 +215,7 @@ $("reviewForm").addEventListener("submit",async e=>{
  try{await addDoc(collection(db,"products",id,"reviews"),{name:$("rName").value.trim(),rating:Number($("rRating").value),text:$("rText").value.trim(),demo:$("rDemo").checked,createdAt:serverTimestamp()});$("rText").value="";alert("Comment add ho gaya.")}catch(err){alert("Comment save nahi hua: "+err.message)}
 });
 async function openDetail(id){
- const p=products.find(x=>x.id===id);if(!p)return;const area=$("detailArea");show("detailArea",true);area.innerHTML=`<button class="secondary" id="backBtn">← Back to products</button><div class="two" style="margin-top:16px"><div class="detail-gallery">${((Array.isArray(p.photoURLs)&&p.photoURLs.length)?p.photoURLs:(p.photoURL?[p.photoURL]:[defaultPhoto()])).map((url,i)=>`<img class="detail-photo" src="${escapeHtml(url)}" alt="${escapeHtml(p.name)} photo ${i+1}">`).join("")}</div><div><div class="price">${money(p.price)}</div><h2>${escapeHtml(p.name)}</h2><p>${escapeHtml(p.description)}</p><h3>Reviews & Comments</h3><div id="publicReviews" class="muted">Loading reviews...</div></div></div>`;$("backBtn").onclick=()=>show("detailArea",false);area.scrollIntoView({behavior:"smooth"});
+ const p=products.find(x=>x.id===id);if(!p)return;const area=$("detailArea");show("detailArea",true);area.innerHTML=`<button class="secondary" id="backBtn">← Back to products</button><div class="two" style="margin-top:16px"><div class="detail-gallery">${((Array.isArray(p.photoURLs)&&p.photoURLs.length)?p.photoURLs:(p.photoURL?[p.photoURL]:[defaultPhoto()])).map((url,i)=>`<img class="detail-photo" src="${escapeHtml(url)}" alt="${escapeHtml(p.name)} photo ${i+1}">`).join("")}</div><div><div class="price">${money(p.price)}</div><h2>${escapeHtml(p.name)}</h2><p>${escapeHtml(p.description)}</p><button id="detailBuy" style="margin:8px 0 16px">Buy Now</button><h3>Reviews & Comments</h3><div id="publicReviews" class="muted">Loading reviews...</div></div></div>`;$("backBtn").onclick=()=>show("detailArea",false);$("detailBuy").onclick=()=>buyProduct(id);area.scrollIntoView({behavior:"smooth"});
  if(!db){$("publicReviews").textContent="Firebase connect hone ke baad reviews yahan nazar aayenge.";return}
  const {getDocs}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
  try{const snap=await getDocs(query(collection(db,"products",id,"reviews"),orderBy("createdAt","desc")));$("publicReviews").innerHTML=snap.empty?'<p class="muted">Abhi koi review nahi.</p>':snap.docs.map(d=>{const r=d.data();return `<div class="review"><b>${escapeHtml(r.name)}</b>${r.demo?'<div class="muted">Demo / Promotional</div>':""}<div class="stars">${"★".repeat(Number(r.rating||5))}${"☆".repeat(5-Number(r.rating||5))}</div><p>${escapeHtml(r.text)}</p></div>`}).join("")}catch(e){$("publicReviews").textContent="Reviews load nahi ho sake."}
