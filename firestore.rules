@@ -1,17 +1,13 @@
 rules_version = '2';
 service cloud.firestore {
-  match /databases/{database}/documents {
-    function isOwner() {
-      return request.auth != null
-        && request.auth.token.email == "talhakhan14746@gmail.com";
-    }
-    match /products/{productId} {
-      allow read: if true;
-      allow create, update, delete: if isOwner();
-      match /reviews/{reviewId} {
-        allow read: if true;
-        allow create, update, delete: if isOwner();
-      }
-    }
+ match /databases/{database}/documents {
+  function isOwner(){return request.auth != null && request.auth.token.email == "talhakhan14746@gmail.com";}
+  match /products/{productId} {
+   allow read: if true;
+   allow create, update, delete: if isOwner();
+   match /reviews/{reviewId} { allow read: if true; allow create, update, delete: if isOwner(); }
   }
+  match /productPhotos/{photoId} { allow read: if true; allow create, update, delete: if isOwner(); }
+  match /orders/{orderId} { allow create: if true; allow read, update, delete: if isOwner(); }
+ }
 }

@@ -27,8 +27,7 @@ MULTI-PHOTO UPDATE:
 - Compression cannot bypass Firebase Storage plan/billing restrictions. If uploads fail with a Firebase Storage billing/permission error, enable Storage or configure alternative image hosting.
 
 
-SAVE + BUY BUTTON FIX:
-- Product text/details are saved to Firestore BEFORE trying image uploads, so a Storage upload/billing error no longer prevents the product itself from being saved.
-- If photo upload fails, the alert explains that the product saved but images did not.
-- Added Buy Now buttons to product cards and detail pages. Configure WHATSAPP_NUMBER near OWNER_EMAIL in index.html using country code and digits only, e.g. 923001234567 (replace with your actual store number).
-- Firebase Storage is still required for hosted image uploads; this change does not bypass Firebase billing or Storage rules.
+PHOTO UPLOAD + CHECKOUT:
+- If Firebase Storage upload fails, photos are compressed and stored as separate Firestore productPhotos documents (each under 520 KB). This requires publishing the included firestore.rules. Firestore still has quotas and is not unlimited photo hosting.
+- Buy Now uses Cash on Delivery (COD), asks name/phone/address/quantity, and records an order in Firestore.
+- This is not card payment processing. Easypaisa/JazzCash/bank transfer need the seller's actual account details. Online card payments require a merchant gateway and secure server-side verification. Do not collect card details in this static site.
