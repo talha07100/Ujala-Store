@@ -18,3 +18,10 @@ FINAL RUNTIME FIX:
 - After uploading this index.html to GitHub, commit the change and hard-refresh the published site with Ctrl+Shift+R.
 - Admin Gmail is talhakhan14746@gmail.com. Reviews marked Demo / Promotional must remain clearly labelled and must not be represented as genuine customer reviews.
 - Image upload depends on Firebase Storage being enabled and available for this Firebase project. If Firebase requires a billing upgrade, image upload cannot work until that service is enabled or an alternative image host is configured.
+
+
+MULTI-PHOTO UPDATE:
+- Product form accepts multiple photos per product.
+- Images larger than 900 KB are resized to a maximum 1800px side and compressed to JPEG in the browser. The previous 5MB hard limit was removed.
+- Product detail pages show all saved photos. Existing single-photo products remain supported.
+- Compression cannot bypass Firebase Storage plan/billing restrictions. If uploads fail with a Firebase Storage billing/permission error, enable Storage or configure alternative image hosting.

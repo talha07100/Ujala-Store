@@ -19,7 +19,7 @@ label{font-size:13px;font-weight:700;display:block;margin:11px 0 6px}.grid{displ
 .card{background:white;border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:0 3px 12px #1231  }
 .photo{width:100%;height:205px;object-fit:cover;background:#edf1ed;display:block}.cardbody{padding:14px}.price{font-weight:850;color:var(--green);font-size:20px}.muted{color:var(--muted);font-size:13px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .panel{background:white;border:1px solid var(--line);border-radius:15px;padding:18px;margin:18px 0}.panel h2{margin:0 0 12px;font-size:21px}.hidden{display:none!important}.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.notice{padding:12px;border-radius:10px;background:#fff7df;color:#634d0d;font-size:13px;margin:12px 0}.success{background:#eaf6ee;color:#215b36}.error{background:#fff0ef;color:#8b2924}
-.review{border-top:1px solid var(--line);padding:12px 0}.stars{color:#c58a13;letter-spacing:2px}.detail-photo{width:100%;max-height:400px;object-fit:contain;background:#f1f3f0;border-radius:12px}.small{font-size:12px}.footer{text-align:center;color:#7b857f;padding:20px;font-size:12px}
+.review{border-top:1px solid var(--line);padding:12px 0}.stars{color:#c58a13;letter-spacing:2px}.detail-photo{width:100%;max-height:400px;object-fit:contain;background:#f1f3f0;border-radius:12px}.photo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:8px;margin-top:10px}.photo-gallery img{width:100%;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}.detail-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.detail-gallery img{width:100%;height:160px;object-fit:contain;background:#f1f3f0;border-radius:10px}.small{font-size:12px}.footer{text-align:center;color:#7b857f;padding:20px;font-size:12px}
 #loginArea{max-width:530px;margin:0 auto}#loginArea button{width:100%;margin-top:8px}.filehint{font-size:12px;color:var(--muted)}.adminbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 </style>
 </head>
@@ -37,7 +37,7 @@ label{font-size:13px;font-weight:700;display:block;margin:11px 0 6px}.grid{displ
  <input id="productId" type="hidden">
  <div class="two"><div><label>Product ka naam *</label><input id="pName" required maxlength="100" placeholder="Misal: Glow Face Cream"></div><div><label>Price (PKR) *</label><input id="pPrice" type="number" min="0" step="1" required placeholder="1500"></div></div>
  <label>Description *</label><textarea id="pDesc" required rows="3" maxlength="3000" placeholder="Product ki details..."></textarea>
- <label>Product Photo</label><input id="pPhoto" type="file" accept="image/*"><div class="filehint">JPG, PNG ya WebP. Behtar hai image 2MB se kam ho.</div>
+ <label>Product Photos (multiple select kar sakte hain)</label><input id="pPhoto" type="file" accept="image/*" multiple><div class="filehint">JPG, PNG, WebP — ek se zyada photos select karein. Bari photos browser mein compress hongi; upload Firebase Storage availability par depend karega.</div><div id="photoPreview" class="photo-gallery"></div>
  <div class="row" style="margin-top:14px"><button id="saveProduct" type="submit">Save Product</button><button id="cancelEdit" type="button" class="secondary hidden">Cancel Edit</button></div>
  </form>
  <hr style="border:0;border-top:1px solid var(--line);margin:22px 0">
@@ -119,27 +119,62 @@ function renderPublic(){
  const term=($("searchBox")?.value||"").toLowerCase();
  const filtered=products.filter(p=>(p.name||"").toLowerCase().includes(term)||(p.description||"").toLowerCase().includes(term));
  $("productCount").textContent=filtered.length+" products";
- $("publicProducts").innerHTML=filtered.length?filtered.map(p=>`<article class="card"><img class="photo" src="${escapeHtml(p.photoURL||defaultPhoto())}" alt="${escapeHtml(p.name)}"><div class="cardbody"><div class="price">${money(p.price)}</div><h3>${escapeHtml(p.name)}</h3><p class="muted">${escapeHtml((p.description||"").slice(0,105))}${(p.description||"").length>105?"…":""}</p><button data-detail="${p.id}">View Product & Reviews</button></div></article>`).join(""):'<p class="muted">Abhi koi product add nahi hua.</p>';
+ $("publicProducts").innerHTML=filtered.length?filtered.map(p=>`<article class="card"><img class="photo" src="${escapeHtml((p.photoURLs?.[0]||p.photoURL||defaultPhoto()))}" alt="${escapeHtml(p.name)}"><div class="cardbody"><div class="price">${money(p.price)}</div><h3>${escapeHtml(p.name)}</h3><p class="muted">${escapeHtml((p.description||"").slice(0,105))}${(p.description||"").length>105?"…":""}</p><button data-detail="${p.id}">View Product & Reviews</button></div></article>`).join(""):'<p class="muted">Abhi koi product add nahi hua.</p>';
  $("publicProducts").querySelectorAll("[data-detail]").forEach(b=>b.onclick=()=>openDetail(b.dataset.detail));
 }
 $("searchBox").addEventListener("input",renderPublic);
 function renderAdminProducts(){
- $("adminProducts").innerHTML=products.length?products.map(p=>`<article class="card"><img class="photo" src="${escapeHtml(p.photoURL||defaultPhoto())}"><div class="cardbody"><b>${escapeHtml(p.name)}</b><div class="price">${money(p.price)}</div><div class="muted">${escapeHtml((p.description||"").slice(0,85))}</div><div class="row" style="margin-top:12px"><button class="secondary" data-edit="${p.id}">Edit</button><button class="secondary" data-reviews="${p.id}">Reviews</button><button class="danger" data-remove="${p.id}">Remove</button></div></div></article>`).join(""):'<p class="muted">Abhi products nahi hain.</p>';
+ $("adminProducts").innerHTML=products.length?products.map(p=>`<article class="card"><img class="photo" src="${escapeHtml((p.photoURLs?.[0]||p.photoURL||defaultPhoto()))}"><div class="cardbody"><b>${escapeHtml(p.name)}</b><div class="price">${money(p.price)}</div><div class="muted">${escapeHtml((p.description||"").slice(0,85))}</div><div class="row" style="margin-top:12px"><button class="secondary" data-edit="${p.id}">Edit</button><button class="secondary" data-reviews="${p.id}">Reviews</button><button class="danger" data-remove="${p.id}">Remove</button></div></div></article>`).join(""):'<p class="muted">Abhi products nahi hain.</p>';
  $("adminProducts").querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editProduct(b.dataset.edit));
  $("adminProducts").querySelectorAll("[data-reviews]").forEach(b=>b.onclick=()=>manageReviews(b.dataset.reviews));
  $("adminProducts").querySelectorAll("[data-remove]").forEach(b=>b.onclick=()=>removeProduct(b.dataset.remove));
 }
-function resetProductForm(){$("productForm").reset();$("productId").value="";$("formTitle").textContent="Naya Product Add Karein";$("saveProduct").textContent="Save Product";show("cancelEdit",false)}
+function resetProductForm(){$("productForm").reset();$("photoPreview").innerHTML="";$("productId").value="";$("formTitle").textContent="Naya Product Add Karein";$("saveProduct").textContent="Save Product";show("cancelEdit",false)}
 function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;$("productId").value=id;$("pName").value=p.name||"";$("pPrice").value=p.price||0;$("pDesc").value=p.description||"";$("formTitle").textContent="Product Edit Karein";$("saveProduct").textContent="Update Product";show("cancelEdit",true);window.scrollTo({top:0,behavior:"smooth"})}
 $("cancelEdit").onclick=resetProductForm;
+
+async function compressImageFile(file){
+  if(!file.type.startsWith("image/")) throw new Error("Sirf image files select karein.");
+  if(file.size <= 900*1024) return file;
+  const image = await new Promise((resolve,reject)=>{
+    const url=URL.createObjectURL(file), img=new Image();
+    img.onload=()=>{URL.revokeObjectURL(url);resolve(img)};
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error("Image read nahi ho saki: "+file.name))};
+    img.src=url;
+  });
+  const maxSide=1800, scale=Math.min(1,maxSide/Math.max(image.naturalWidth,image.naturalHeight));
+  const canvas=document.createElement("canvas");
+  canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));
+  canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
+  canvas.getContext("2d").drawImage(image,0,0,canvas.width,canvas.height);
+  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",0.82));
+  if(!blob) throw new Error("Image compress nahi ho saki: "+file.name);
+  return new File([blob],file.name.replace(/\.[^.]+$/,"")+".jpg",{type:"image/jpeg",lastModified:Date.now()});
+}
+$("pPhoto").addEventListener("change",()=>{
+  const files=[...($("pPhoto").files||[])];
+  $("photoPreview").innerHTML=files.map(f=>`<div title="${escapeHtml(f.name)}"><img alt="${escapeHtml(f.name)}" src="${URL.createObjectURL(f)}"><div class="small">${escapeHtml(f.name)}</div></div>`).join("");
+});
+
 $("productForm").addEventListener("submit",async e=>{
  e.preventDefault();if(!isAdmin)return;
  const btn=$("saveProduct");btn.disabled=true;btn.textContent="Saving...";
  try{
-  const id=$("productId").value;let photoURL=products.find(p=>p.id===id)?.photoURL||"";
-  const file=$("pPhoto").files[0];
-  if(file){if(file.size>5*1024*1024)throw new Error("Photo 5MB se kam honi chahiye.");const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");const r=ref(storage,"products/"+Date.now()+"_"+safe);await uploadBytes(r,file);photoURL=await getDownloadURL(r)}
-  const data={name:$("pName").value.trim(),price:Number($("pPrice").value),description:$("pDesc").value.trim(),photoURL,updatedAt:serverTimestamp()};
+  const id=$("productId").value;
+  const existing=products.find(p=>p.id===id);
+  let photoURLs=Array.isArray(existing?.photoURLs)?[...existing.photoURLs]:(existing?.photoURL?[existing.photoURL]:[]);
+  const files=[...($("pPhoto").files||[])];
+  if(files.length){
+    for(let i=0;i<files.length;i++){
+      const file=await compressImageFile(files[i]);
+      const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");
+      const storageRef=ref(storage,"products/"+Date.now()+"_"+i+"_"+safe);
+      await uploadBytes(storageRef,file,{contentType:file.type});
+      photoURLs.push(await getDownloadURL(storageRef));
+    }
+  }
+  const photoURL=photoURLs[0]||"";
+  const data={name:$("pName").value.trim(),price:Number($("pPrice").value),description:$("pDesc").value.trim(),photoURL,photoURLs,updatedAt:serverTimestamp()};
   if(id)await setDoc(doc(db,"products",id),data,{merge:true});else await addDoc(collection(db,"products"),{...data,createdAt:serverTimestamp()});
   resetProductForm();alert("Product save ho gaya.");
  }catch(err){alert("Save nahi ho saka: "+err.message)}finally{btn.disabled=false;btn.textContent=$("productId").value?"Update Product":"Save Product"}
@@ -162,7 +197,7 @@ $("reviewForm").addEventListener("submit",async e=>{
  try{await addDoc(collection(db,"products",id,"reviews"),{name:$("rName").value.trim(),rating:Number($("rRating").value),text:$("rText").value.trim(),demo:$("rDemo").checked,createdAt:serverTimestamp()});$("rText").value="";alert("Comment add ho gaya.")}catch(err){alert("Comment save nahi hua: "+err.message)}
 });
 async function openDetail(id){
- const p=products.find(x=>x.id===id);if(!p)return;const area=$("detailArea");show("detailArea",true);area.innerHTML=`<button class="secondary" id="backBtn">← Back to products</button><div class="two" style="margin-top:16px"><div><img class="detail-photo" src="${escapeHtml(p.photoURL||defaultPhoto())}"></div><div><div class="price">${money(p.price)}</div><h2>${escapeHtml(p.name)}</h2><p>${escapeHtml(p.description)}</p><h3>Reviews & Comments</h3><div id="publicReviews" class="muted">Loading reviews...</div></div></div>`;$("backBtn").onclick=()=>show("detailArea",false);area.scrollIntoView({behavior:"smooth"});
+ const p=products.find(x=>x.id===id);if(!p)return;const area=$("detailArea");show("detailArea",true);area.innerHTML=`<button class="secondary" id="backBtn">← Back to products</button><div class="two" style="margin-top:16px"><div class="detail-gallery">${((Array.isArray(p.photoURLs)&&p.photoURLs.length)?p.photoURLs:(p.photoURL?[p.photoURL]:[defaultPhoto()])).map((url,i)=>`<img class="detail-photo" src="${escapeHtml(url)}" alt="${escapeHtml(p.name)} photo ${i+1}">`).join("")}</div><div><div class="price">${money(p.price)}</div><h2>${escapeHtml(p.name)}</h2><p>${escapeHtml(p.description)}</p><h3>Reviews & Comments</h3><div id="publicReviews" class="muted">Loading reviews...</div></div></div>`;$("backBtn").onclick=()=>show("detailArea",false);area.scrollIntoView({behavior:"smooth"});
  if(!db){$("publicReviews").textContent="Firebase connect hone ke baad reviews yahan nazar aayenge.";return}
  const {getDocs}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
  try{const snap=await getDocs(query(collection(db,"products",id,"reviews"),orderBy("createdAt","desc")));$("publicReviews").innerHTML=snap.empty?'<p class="muted">Abhi koi review nahi.</p>':snap.docs.map(d=>{const r=d.data();return `<div class="review"><b>${escapeHtml(r.name)}</b>${r.demo?'<div class="muted">Demo / Promotional</div>':""}<div class="stars">${"★".repeat(Number(r.rating||5))}${"☆".repeat(5-Number(r.rating||5))}</div><p>${escapeHtml(r.text)}</p></div>`}).join("")}catch(e){$("publicReviews").textContent="Reviews load nahi ho sake."}
