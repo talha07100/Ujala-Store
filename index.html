@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="ur">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#176b52">
+<title>Ujala Store</title>
+<style>
+:root{--green:#176b52;--dark:#103f32;--cream:#f7f5ef;--line:#e4e8e2;--muted:#68736d}
+*{box-sizing:border-box}body{margin:0;background:#fafbf9;color:#17211d;font-family:system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{background:linear-gradient(120deg,var(--dark),var(--green));color:white;padding:18px max(16px,calc((100% - 1150px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{font-weight:850;font-size:25px;letter-spacing:.2px}.tag{font-size:12px;opacity:.85}
+button,.btn{border:0;border-radius:10px;padding:10px 14px;background:var(--green);color:white;font-weight:700;cursor:pointer}
+button.secondary{background:#edf3ef;color:var(--dark);border:1px solid #d8e3dc}button.danger{background:#a62d2d}button:disabled{opacity:.5;cursor:not-allowed}
+main{max-width:1150px;margin:0 auto;padding:22px 16px 60px}.hero{padding:24px;border-radius:18px;background:#eef5ef;border:1px solid #dfe9e1;margin-bottom:20px}
+.hero h1{margin:0 0 7px;font-size:clamp(25px,4vw,38px)}.hero p{margin:0;color:#506159}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.toolbar input{flex:1;min-width:180px}
+input,textarea,select{width:100%;padding:11px 12px;border:1px solid #d8dfda;border-radius:9px;background:white;font:inherit;color:#17211d}
+label{font-size:13px;font-weight:700;display:block;margin:11px 0 6px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.card{background:white;border:1px solid var(--line);border-radius:15px;overflow:hidden;box-shadow:0 3px 12px #1231  }
+.photo{width:100%;height:205px;object-fit:cover;background:#edf1ed;display:block}.cardbody{padding:14px}.price{font-weight:850;color:var(--green);font-size:20px}.muted{color:var(--muted);font-size:13px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.panel{background:white;border:1px solid var(--line);border-radius:15px;padding:18px;margin:18px 0}.panel h2{margin:0 0 12px;font-size:21px}.hidden{display:none!important}.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.notice{padding:12px;border-radius:10px;background:#fff7df;color:#634d0d;font-size:13px;margin:12px 0}.success{background:#eaf6ee;color:#215b36}.error{background:#fff0ef;color:#8b2924}
+.review{border-top:1px solid var(--line);padding:12px 0}.stars{color:#c58a13;letter-spacing:2px}.detail-photo{width:100%;max-height:400px;object-fit:contain;background:#f1f3f0;border-radius:12px}.small{font-size:12px}.footer{text-align:center;color:#7b857f;padding:20px;font-size:12px}
+#loginArea{max-width:530px;margin:0 auto}#loginArea button{width:100%;margin-top:8px}.filehint{font-size:12px;color:var(--muted)}.adminbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<header><div><div class="brand">✦ Ujala Store</div><div class="tag">Aapki pasand, aapke qareeb</div></div><div class="adminbar"><span id="userLabel" class="small"></span><button id="loginBtn" class="secondary">Admin Login</button><button id="logoutBtn" class="secondary hidden">Logout</button></div></header>
+<main>
+<section class="hero"><h1>Welcome to Ujala Store</h1><p>Hamari products dekhein, details parhein aur har product ke customer comments explore karein.</p></section>
+<div id="setupNotice" class="notice">Setup required: Firebase config add karne ke baad Gmail login, products aur photo upload kaam karenge. Tareeqa README file mein hai.</div>
+<section id="loginArea" class="panel hidden"><h2>Admin Login</h2><p class="muted">Sirf authorized Gmail account ko product manage karne ki ijazat hogi.</p><div id="authMsg" class="notice hidden"></div><button id="googleLogin">Continue with Google</button></section>
+<section id="adminArea" class="panel hidden">
+ <div class="row"><h2>Store Management</h2><span id="adminEmail" class="muted"></span></div>
+ <div class="notice success">Aap admin mode mein hain. Changes public store par Firebase ke zariye save honge.</div>
+ <h3 id="formTitle">Naya Product Add Karein</h3>
+ <form id="productForm">
+ <input id="productId" type="hidden">
+ <div class="two"><div><label>Product ka naam *</label><input id="pName" required maxlength="100" placeholder="Misal: Glow Face Cream"></div><div><label>Price (PKR) *</label><input id="pPrice" type="number" min="0" step="1" required placeholder="1500"></div></div>
+ <label>Description *</label><textarea id="pDesc" required rows="3" maxlength="3000" placeholder="Product ki details..."></textarea>
+ <label>Product Photo</label><input id="pPhoto" type="file" accept="image/*"><div class="filehint">JPG, PNG ya WebP. Behtar hai image 2MB se kam ho.</div>
+ <div class="row" style="margin-top:14px"><button id="saveProduct" type="submit">Save Product</button><button id="cancelEdit" type="button" class="secondary hidden">Cancel Edit</button></div>
+ </form>
+ <hr style="border:0;border-top:1px solid var(--line);margin:22px 0">
+ <h3>Products aur unke Reviews</h3><div id="adminProducts" class="grid"></div>
+ <div id="reviewManager" class="hidden"><hr style="border:0;border-top:1px solid var(--line);margin:22px 0"><h3 id="reviewHeading">Product Reviews</h3>
+ <form id="reviewForm"><input id="reviewProductId" type="hidden"><div class="two"><div><label>Display name</label><input id="rName" required maxlength="70" placeholder="Customer name ya Demo Review"></div><div><label>Rating</label><select id="rRating"><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select></div></div>
+ <label>Comment *</label><textarea id="rText" required maxlength="1000" rows="2" placeholder="Comment likhein..."></textarea><label><input id="rDemo" type="checkbox" style="width:auto"> Isay clearly “Demo / Promotional” label karein</label><button type="submit">Add Review / Comment</button></form><div id="reviewAdminList"></div></div>
+</section>
+<section id="publicArea"><div class="row"><h2>Our Products</h2><span id="productCount" class="muted"></span></div><div class="toolbar"><input id="searchBox" placeholder="Product search karein..."></div><div id="publicProducts" class="grid"></div></section>
+<section id="detailArea" class="panel hidden"></section>
+</main>
+<div class="footer">© <span id="year"></span> Ujala Store</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+/* Paste your Firebase web app config here (see README). */
+const firebaseConfig = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
+  projectId: "PASTE_PROJECT_ID",
+  storageBucket: "PASTE_PROJECT_ID.appspot.com",
+  messagingSenderId: "PASTE_MESSAGING_SENDER_ID",
+  appId: "PASTE_APP_ID"
+};
+const OWNER_EMAIL = "talhakhan14746@gmail.com";
+const isConfigured = firebaseConfig.apiKey !== "PASTE_API_KEY" && firebaseConfig.projectId !== "PASTE_PROJECT_ID";
+const $ = id => document.getElementById(id);
+$("year").textContent = new Date().getFullYear();
+let app,auth,db,storage,currentUser=null,isAdmin=false,products=[],reviews={},stopProducts=null,stopReviews=null,selectedReviewProduct=null;
+const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money = n => "Rs. "+Number(n||0).toLocaleString("en-PK");
+function show(el,on=true){$(el).classList.toggle("hidden",!on)}
+function msg(text,kind="notice"){ $("authMsg").className="notice "+kind; $("authMsg").textContent=text; show("authMsg",true); }
+function defaultPhoto(){return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="500" height="350"><rect width="100%" height="100%" fill="#edf2ed"/><text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="24" fill="#648171">Ujala Store</text></svg>');}
+if(isConfigured){
+ try{
+  app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app);storage=getStorage(app);
+  $("setupNotice").classList.add("hidden");
+  $("loginBtn").addEventListener("click",()=>show("loginArea"));
+  $("googleLogin").addEventListener("click",async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){msg("Login error: "+e.message,"error")}});
+  $("logoutBtn").addEventListener("click",()=>signOut(auth));
+  onAuthStateChanged(auth,user=>{
+   currentUser=user;isAdmin=!!user&&user.email?.toLowerCase()===OWNER_EMAIL.toLowerCase();
+   $("userLabel").textContent=user?user.email:"";
+   show("loginBtn",!user);show("logoutBtn",!!user);show("loginArea",false);show("adminArea",isAdmin);
+   if(user&&!isAdmin){$("loginBtn").classList.add("hidden");$("userLabel").textContent=user.email+" (not authorized)";msg("Yeh Gmail admin ke liye authorized nahi hai.","error");show("loginArea",true)}
+   if(isAdmin){$("adminEmail").textContent=user.email;listenProducts()}else{if(stopProducts)stopProducts();listenPublicProducts()}
+  });
+ }catch(e){$("setupNotice").textContent="Firebase setup error: "+e.message}
+}else{
+ $("loginBtn").addEventListener("click",()=>{show("loginArea");msg("Pehle README ke mutabiq Firebase config add karein.")});
+ $("googleLogin").addEventListener("click",()=>msg("Firebase config abhi add nahi hui. README file follow karein."));
+ renderPublic();
+}
+function listenPublicProducts(){
+ if(!db){renderPublic();return}
+ if(stopProducts)stopProducts();
+ stopProducts=onSnapshot(collection(db,"products"),snap=>{products=snap.docs.map(d=>({id:d.id,...d.data()}));renderPublic()},e=>console.error(e));
+}
+function listenProducts(){
+ if(stopProducts)stopProducts();
+ stopProducts=onSnapshot(collection(db,"products"),snap=>{products=snap.docs.map(d=>({id:d.id,...d.data()}));renderPublic();renderAdminProducts()},e=>console.error(e));
+}
+function renderAdminProducts(){
+ $("adminProducts").innerHTML=products.length?products.map(p=>`<article class="card"><img class="photo" src="${escapeHtml(p.photoURL||defaultPhoto())}"><div class="cardbody"><b>${escapeHtml(p.name)}</b><div class="price">${money(p.price)}</div><div class="muted">${escapeHtml((p.description||"").slice(0,85))}</div><div class="row" style="margin-top:12px"><button class="secondary" data-edit="${p.id}">Edit</button><button class="secondary" data-reviews="${p.id}">Reviews</button><button class="danger" data-remove="${p.id}">Remove</button></div></div></article>`).join(""):'<p class="muted">Abhi products nahi hain.</p>';
+ $("adminProducts").querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editProduct(b.dataset.edit));
+ $("adminProducts").querySelectorAll("[data-reviews]").forEach(b=>b.onclick=()=>manageReviews(b.dataset.reviews));
+ $("adminProducts").querySelectorAll("[data-remove]").forEach(b=>b.onclick=()=>removeProduct(b.dataset.remove));
+}
+function resetProductForm(){$("productForm").reset();$("productId").value="";$("formTitle").textContent="Naya Product Add Karein";$("saveProduct").textContent="Save Product";show("cancelEdit",false)}
+function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;$("productId").value=id;$("pName").value=p.name||"";$("pPrice").value=p.price||0;$("pDesc").value=p.description||"";$("formTitle").textContent="Product Edit Karein";$("saveProduct").textContent="Update Product";show("cancelEdit",true);window.scrollTo({top:0,behavior:"smooth"})}
+$("cancelEdit").onclick=resetProductForm;
+$("productForm").addEventListener("submit",async e=>{
+ e.preventDefault();if(!isAdmin)return;
+ const btn=$("saveProduct");btn.disabled=true;btn.textContent="Saving...";
+ try{
+  const id=$("productId").value;let photoURL=products.find(p=>p.id===id)?.photoURL||"";
+  const file=$("pPhoto").files[0];
+  if(file){if(file.size>5*1024*1024)throw new Error("Photo 5MB se kam honi chahiye.");const safe=file.name.replace(/[^a-zA-Z0-9._-]/g,"_");const r=ref(storage,"products/"+Date.now()+"_"+safe);await uploadBytes(r,file);photoURL=await getDownloadURL(r)}
+  const data={name:$("pName").value.trim(),price:Number($("pPrice").value),description:$("pDesc").value.trim(),photoURL,updatedAt:serverTimestamp()};
+  if(id)await setDoc(doc(db,"products",id),data,{merge:true});else await addDoc(collection(db,"products"),{...data,createdAt:serverTimestamp()});
+  resetProductForm();alert("Product save ho gaya.");
+ }catch(err){alert("Save nahi ho saka: "+err.message)}finally{btn.disabled=false;btn.textContent=$("productId").value?"Update Product":"Save Product"}
+});
+async function removeProduct(id){
+ if(!isAdmin||!confirm("Kya aap is product aur is ke tamam reviews ko remove karna chahte hain?"))return;
+ try{const p=products.find(x=>x.id===id);await deleteDoc(doc(db,"products",id));const snap=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js").then(m=>m.getDocs(collection(db,"products",id,"reviews")));for(const r of snap.docs)await deleteDoc(r.ref);if(p?.photoURL){try{const u=new URL(p.photoURL);const path=decodeURIComponent(u.pathname.split("/o/")[1]||"").split("?")[0];if(path)await deleteObject(ref(storage,path))}catch{}}if(selectedReviewProduct===id)show("reviewManager",false)}catch(e){alert("Remove error: "+e.message)}
+}
+async function manageReviews(id){
+ selectedReviewProduct=id;const p=products.find(x=>x.id===id);$("reviewProductId").value=id;$("reviewHeading").textContent="Reviews: "+(p?.name||"Product");show("reviewManager",true);$("reviewAdminList").innerHTML="Loading...";
+ if(stopReviews)stopReviews();
+ stopReviews=onSnapshot(query(collection(db,"products",id,"reviews"),orderBy("createdAt","desc")),snap=>{
+  $("reviewAdminList").innerHTML=snap.empty?'<p class="muted">Is product ke reviews abhi nahi hain.</p>':snap.docs.map(d=>{const r=d.data();return `<div class="review"><div class="row"><b>${escapeHtml(r.name)}</b><button class="danger" data-delreview="${d.id}">Delete</button></div><div class="stars">${"★".repeat(Number(r.rating||5))}${"☆".repeat(5-Number(r.rating||5))}</div><p>${escapeHtml(r.text)}</p>${r.demo?'<span class="muted">Demo / Promotional</span>':""}</div>`}).join("");
+  $("reviewAdminList").querySelectorAll("[data-delreview]").forEach(b=>b.onclick=async()=>{if(confirm("Review delete karein?"))await deleteDoc(doc(db,"products",id,"reviews",b.dataset.delreview))});
+ },e=>$("reviewAdminList").textContent="Reviews load error: "+e.message);
+ $("reviewManager").scrollIntoView({behavior:"smooth"});
+}
+$("reviewForm").addEventListener("submit",async e=>{
+ e.preventDefault();if(!isAdmin)return;const id=$("reviewProductId").value;
+ try{await addDoc(collection(db,"products",id,"reviews"),{name:$("rName").value.trim(),rating:Number($("rRating").value),text:$("rText").value.trim(),demo:$("rDemo").checked,createdAt:serverTimestamp()});$("rText").value="";alert("Comment add ho gaya.")}catch(err){alert("Comment save nahi hua: "+err.message)}
+});
+async function openDetail(id){
+ const p=products.find(x=>x.id===id);if(!p)return;const area=$("detailArea");show("detailArea",true);area.innerHTML=`<button class="secondary" id="backBtn">← Back to products</button><div class="two" style="margin-top:16px"><div><img class="detail-photo" src="${escapeHtml(p.photoURL||defaultPhoto())}"></div><div><div class="price">${money(p.price)}</div><h2>${escapeHtml(p.name)}</h2><p>${escapeHtml(p.description)}</p><h3>Reviews & Comments</h3><div id="publicReviews" class="muted">Loading reviews...</div></div></div>`;$("backBtn").onclick=()=>show("detailArea",false);area.scrollIntoView({behavior:"smooth"});
+ if(!db){$("publicReviews").textContent="Firebase connect hone ke baad reviews yahan nazar aayenge.";return}
+ const {getDocs}=await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
+ try{const snap=await getDocs(query(collection(db,"products",id,"reviews"),orderBy("createdAt","desc")));$("publicReviews").innerHTML=snap.empty?'<p class="muted">Abhi koi review nahi.</p>':snap.docs.map(d=>{const r=d.data();return `<div class="review"><b>${escapeHtml(r.name)}</b>${r.demo?'<div class="muted">Demo / Promotional</div>':""}<div class="stars">${"★".repeat(Number(r.rating||5))}${"☆".repeat(5-Number(r.rating||5))}</div><p>${escapeHtml(r.text)}</p></div>`}).join("")}catch(e){$("publicReviews").textContent="Reviews load nahi ho sake."}
+}
+function renderPublic(){const term=($("searchBox")?.value||"").toLowerCase();const filtered=products.filter(p=>(p.name||"").toLowerCase().includes(term)||(p.description||"").toLowerCase().includes(term));$("productCount").textContent=filtered.length+" products";$("publicProducts").innerHTML=filtered.length?filtered.map(p=>`<article class="card"><img class="photo" src="${escapeHtml(p.photoURL||defaultPhoto())}" alt="${escapeHtml(p.name)}"><div class="cardbody"><div class="price">${money(p.price)}</div><h3>${escapeHtml(p.name)}</h3><p class="muted">${escapeHtml((p.description||"").slice(0,105))}${(p.description||"").length>105?"…":""}</p><button data-detail="${p.id}">View Product & Reviews</button></div></article>`).join(""):'<p class="muted">Abhi koi product add nahi hua.</p>';$("publicProducts").querySelectorAll("[data-detail]").forEach(b=>b.onclick=()=>openDetail(b.dataset.detail))}
+</script>
+</body></html>
