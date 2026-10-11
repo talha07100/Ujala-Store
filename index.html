@@ -20,7 +20,7 @@ label{font-size:13px;font-weight:700;display:block;margin:11px 0 6px}.grid{displ
 .photo{width:100%;height:205px;object-fit:cover;background:#edf1ed;display:block}.cardbody{padding:14px}.price{font-weight:850;color:var(--green);font-size:20px}.muted{color:var(--muted);font-size:13px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .panel{background:white;border:1px solid var(--line);border-radius:15px;padding:18px;margin:18px 0}.panel h2{margin:0 0 12px;font-size:21px}.hidden{display:none!important}.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.notice{padding:12px;border-radius:10px;background:#fff7df;color:#634d0d;font-size:13px;margin:12px 0}.success{background:#eaf6ee;color:#215b36}.error{background:#fff0ef;color:#8b2924}
 .review{border-top:1px solid var(--line);padding:12px 0}.stars{color:#c58a13;letter-spacing:2px}.detail-photo{width:100%;max-height:400px;object-fit:contain;background:#f1f3f0;border-radius:12px}.photo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:8px;margin-top:10px}.photo-gallery img{width:100%;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}.detail-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.detail-gallery img{width:100%;height:160px;object-fit:contain;background:#f1f3f0;border-radius:10px}.small{font-size:12px}.footer{text-align:center;color:#7b857f;padding:20px;font-size:12px}
-#loginArea{max-width:530px;margin:0 auto}#loginArea button{width:100%;margin-top:8px}.filehint{font-size:12px;color:var(--muted)}.adminbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#loginArea{max-width:530px;margin:0 auto}#loginArea button{width:100%;margin-top:8px}.filehint{font-size:12px;color:var(--muted)}.photo-error{padding:10px;background:#fff0ef;color:#8b2924;border-radius:8px;margin:8px 0;font-size:13px}.adminbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 </style>
 </head>
 <body>
@@ -75,7 +75,7 @@ $("loginBtn").onclick = () => {
   show("loginArea", true);
   if (!isConfigured) msg("Firebase config add karna baqi hai. Updated index.html GitHub par publish karein.");
 };
-let app,auth,db,storage,currentUser=null,isAdmin=false,products=[],reviews={},stopProducts=null,stopReviews=null,selectedReviewProduct=null;
+let app,auth,db,storage,currentUser=null,isAdmin=false,products=[],photoDocs=[],reviews={},stopProducts=null,stopPhotos=null,stopReviews=null,selectedReviewProduct=null;
 const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const money = n => "Rs. "+Number(n||0).toLocaleString("en-PK");
 function show(el,on=true){$(el).classList.toggle("hidden",!on)}
@@ -93,7 +93,7 @@ if(isConfigured){
    $("userLabel").textContent=user?user.email:"";
    show("loginBtn",!user);show("logoutBtn",!!user);show("loginArea",false);show("adminArea",isAdmin);
    if(user&&!isAdmin){$("loginBtn").classList.add("hidden");$("userLabel").textContent=user.email+" (not authorized)";msg("Yeh Gmail admin ke liye authorized nahi hai.","error");show("loginArea",true)}
-   if(isAdmin){$("adminEmail").textContent=user.email;listenProducts()}else{if(stopProducts)stopProducts();listenPublicProducts()}
+   if(isAdmin){$("adminEmail").textContent=user.email;listenProducts()}else{if(stopProducts)stopProducts();if(stopPhotos)stopPhotos();listenPublicProducts()}
   });
  }catch(e){
   $("setupNotice").textContent="Firebase setup error: "+e.message;
@@ -109,8 +109,9 @@ if(isConfigured){
 function listenPublicProducts(){
  if(!db){renderPublic();return}
  if(stopProducts)stopProducts();
- stopProducts=onSnapshot(collection(db,"products"),snap=>{products=snap.docs.map(d=>({id:d.id,...d.data()}));mergePhotos();renderPublic()},e=>console.error(e));
- onSnapshot(collection(db,"productPhotos"),snap=>{photoDocs=snap.docs.map(d=>({id:d.id,...d.data()}));mergePhotos();renderPublic()},e=>console.error("Photo records read failed",e));
+ if(stopPhotos)stopPhotos();
+ stopProducts=onSnapshot(collection(db,"products"),snap=>{products=snap.docs.map(d=>({id:d.id,...d.data()}));mergePhotos();renderPublic()},e=>{console.error("Products read failed",e);$("publicProducts").innerHTML='<p class="notice error">Products load nahi ho rahe: '+escapeHtml(e.message)+'</p>';});
+ stopPhotos=onSnapshot(collection(db,"productPhotos"),snap=>{photoDocs=snap.docs.map(d=>({id:d.id,...d.data()}));mergePhotos();renderPublic()},e=>console.error("Photo records read failed",e));
 }
 function listenProducts(){
  if(stopProducts)stopProducts();
@@ -233,7 +234,7 @@ $("productForm").addEventListener("submit",async e=>{
       photoWarning=" Photos save nahi ho sakin: "+photoError.message+". Firestore rules/quota check karein.";
     }
   }
-  resetProductForm();alert("Product details save ho gayi."+photoWarning);
+  resetProductForm();alert((photoWarning ? "Product details save ho gayi." : "Product save ho gaya.")+photoWarning);
  }catch(err){alert("Save nahi ho saka: "+err.message)}finally{btn.disabled=false;btn.textContent=$("productId").value?"Update Product":"Save Product"}
 });
 async function removeProduct(id){

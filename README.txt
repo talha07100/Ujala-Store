@@ -31,3 +31,6 @@ PHOTO UPLOAD + CHECKOUT:
 - If Firebase Storage upload fails, photos are compressed and stored as separate Firestore productPhotos documents (each under 520 KB). This requires publishing the included firestore.rules. Firestore still has quotas and is not unlimited photo hosting.
 - Buy Now uses Cash on Delivery (COD), asks name/phone/address/quantity, and records an order in Firestore.
 - This is not card payment processing. Easypaisa/JazzCash/bank transfer need the seller's actual account details. Online card payments require a merchant gateway and secure server-side verification. Do not collect card details in this static site.
+
+
+BUG FIX: Declared photoDocs and stopPhotos state variables that were referenced by photo listeners but missing from the app state declaration. That ReferenceError could stop product/photo rendering. Public listener errors now display on the page.
