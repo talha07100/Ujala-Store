@@ -67,6 +67,12 @@ const firebaseConfig = {
 };
 const OWNER_EMAIL = "talhakhan14746@gmail.com";
 const isConfigured = firebaseConfig.apiKey !== "PASTE_API_KEY" && firebaseConfig.projectId !== "PASTE_PROJECT_ID";
+// Keep Admin Login responsive even if Firebase initialization/configuration fails.
+$("loginBtn").onclick = () => {
+  show("loginArea", true);
+  if (!isConfigured) msg("Firebase config add karna baqi hai. Updated index.html GitHub par publish karein.");
+};
+
 const $ = id => document.getElementById(id);
 $("year").textContent = new Date().getFullYear();
 let app,auth,db,storage,currentUser=null,isAdmin=false,products=[],reviews={},stopProducts=null,stopReviews=null,selectedReviewProduct=null;
