@@ -58,12 +58,12 @@ import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "http
 
 /* Paste your Firebase web app config here (see README). */
 const firebaseConfig = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
-  projectId: "PASTE_PROJECT_ID",
-  storageBucket: "PASTE_PROJECT_ID.appspot.com",
-  messagingSenderId: "PASTE_MESSAGING_SENDER_ID",
-  appId: "PASTE_APP_ID"
+  apiKey: "AIzaSyCrkPT-pV69Z-a_UKoPX_JmiPV8C-eyOwg",
+  authDomain: "ujala-store.firebaseapp.com",
+  projectId: "ujala-store",
+  storageBucket: "ujala-store.firebasestorage.app",
+  messagingSenderId: "893299030945",
+  appId: "1:893299030945:web:0c96c6ccc89514bc7969e0"
 };
 const OWNER_EMAIL = "talhakhan14746@gmail.com";
 const isConfigured = firebaseConfig.apiKey !== "PASTE_API_KEY" && firebaseConfig.projectId !== "PASTE_PROJECT_ID";
@@ -104,6 +104,14 @@ function listenProducts(){
  if(stopProducts)stopProducts();
  stopProducts=onSnapshot(collection(db,"products"),snap=>{products=snap.docs.map(d=>({id:d.id,...d.data()}));renderPublic();renderAdminProducts()},e=>console.error(e));
 }
+function renderPublic(){
+ const term=($("searchBox")?.value||"").toLowerCase();
+ const filtered=products.filter(p=>(p.name||"").toLowerCase().includes(term)||(p.description||"").toLowerCase().includes(term));
+ $("productCount").textContent=filtered.length+" products";
+ $("publicProducts").innerHTML=filtered.length?filtered.map(p=>`<article class="card"><img class="photo" src="${escapeHtml(p.photoURL||defaultPhoto())}" alt="${escapeHtml(p.name)}"><div class="cardbody"><div class="price">${money(p.price)}</div><h3>${escapeHtml(p.name)}</h3><p class="muted">${escapeHtml((p.description||"").slice(0,105))}${(p.description||"").length>105?"…":""}</p><button data-detail="${p.id}">View Product & Reviews</button></div></article>`).join(""):'<p class="muted">Abhi koi product add nahi hua.</p>';
+ $("publicProducts").querySelectorAll("[data-detail]").forEach(b=>b.onclick=()=>openDetail(b.dataset.detail));
+}
+$("searchBox").addEventListener("input",renderPublic);
 function renderAdminProducts(){
  $("adminProducts").innerHTML=products.length?products.map(p=>`<article class="card"><img class="photo" src="${escapeHtml(p.photoURL||defaultPhoto())}"><div class="cardbody"><b>${escapeHtml(p.name)}</b><div class="price">${money(p.price)}</div><div class="muted">${escapeHtml((p.description||"").slice(0,85))}</div><div class="row" style="margin-top:12px"><button class="secondary" data-edit="${p.id}">Edit</button><button class="secondary" data-reviews="${p.id}">Reviews</button><button class="danger" data-remove="${p.id}">Remove</button></div></div></article>`).join(""):'<p class="muted">Abhi products nahi hain.</p>';
  $("adminProducts").querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editProduct(b.dataset.edit));
