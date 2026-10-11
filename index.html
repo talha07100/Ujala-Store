@@ -21,12 +21,25 @@ label{font-size:13px;font-weight:700;display:block;margin:11px 0 6px}.grid{displ
 .panel{background:white;border:1px solid var(--line);border-radius:15px;padding:18px;margin:18px 0}.panel h2{margin:0 0 12px;font-size:21px}.hidden{display:none!important}.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}.notice{padding:12px;border-radius:10px;background:#fff7df;color:#634d0d;font-size:13px;margin:12px 0}.success{background:#eaf6ee;color:#215b36}.error{background:#fff0ef;color:#8b2924}
 .review{border-top:1px solid var(--line);padding:12px 0}.stars{color:#c58a13;letter-spacing:2px}.detail-photo{width:100%;max-height:400px;object-fit:contain;background:#f1f3f0;border-radius:12px}.photo-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:8px;margin-top:10px}.photo-gallery img{width:100%;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}.detail-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}.detail-gallery img{width:100%;height:160px;object-fit:contain;background:#f1f3f0;border-radius:10px}.small{font-size:12px}.footer{text-align:center;color:#7b857f;padding:20px;font-size:12px}
 #loginArea{max-width:530px;margin:0 auto}#loginArea button{width:100%;margin-top:8px}.filehint{font-size:12px;color:var(--muted)}.photo-error{padding:10px;background:#fff0ef;color:#8b2924;border-radius:8px;margin:8px 0;font-size:13px}.adminbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+ 
+.announcement{background:#0c3027;color:#eaf6ed;text-align:center;padding:8px 12px;font-size:12px;letter-spacing:.3px}
+header{position:sticky;top:0;z-index:10;box-shadow:0 6px 20px #00000012}
+.hero{display:flex;align-items:center;justify-content:space-between;gap:24px;min-height:245px;background:linear-gradient(120deg,#eaf4ec,#f8f3e8);overflow:hidden}
+.hero h1{max-width:650px;line-height:1.08;font-size:clamp(30px,4.5vw,48px);margin:10px 0}
+.hero p{max-width:580px;margin-bottom:18px;line-height:1.7}.eyebrow{font-size:11px;font-weight:800;letter-spacing:2px;color:var(--green)}
+.hero-art{width:190px;height:190px;min-width:150px;border-radius:50%;background:linear-gradient(145deg,#176b52,#0b392d);color:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:55px;box-shadow:0 18px 40px #103f3230}
+.hero-art span{font-size:14px;text-align:center;letter-spacing:3px;font-weight:800}
+.toolbar{align-items:center}.toolbar select{max-width:210px}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}.chip{border:1px solid #dce6df;border-radius:30px;background:white;color:#24513e;padding:7px 13px;font-size:12px}.chip.active{background:#176b52;color:white}
+.store-tools{display:flex;gap:18px;flex-wrap:wrap;color:#547064;font-size:12px;margin:4px 0 18px}.card{transition:transform .18s,box-shadow .18s}.card:hover{transform:translateY(-3px);box-shadow:0 12px 28px #1232}.card h3{margin:8px 0}.card .row button{flex:1}.heart{background:#fff!important;color:#176b52!important;border:1px solid #d8e3dc!important}
+#cartArea{max-width:850px;margin:20px auto}.cart-line{display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding:12px 0}.cart-line input{width:75px}.footer{background:#103f32;color:#eaf6ed;margin-top:40px;padding:32px 16px}.footer small{display:block;margin-top:8px;color:#b7cfc2}
+@media(max-width:600px){.hero{padding:20px;min-height:auto}.hero-art{width:100px;height:100px;min-width:100px;font-size:30px}.hero-art span{font-size:9px}.hero h1{font-size:29px}.toolbar select{max-width:none}.cart-line{grid-template-columns:1fr auto}.cart-line input{grid-column:1}}
 </style>
 </head>
 <body>
-<header><div><div class="brand">✦ Ujala Store</div><div class="tag">Aapki pasand, aapke qareeb</div></div><div class="adminbar"><span id="userLabel" class="small"></span><button id="loginBtn" class="secondary">Admin Login</button><button id="logoutBtn" class="secondary hidden">Logout</button></div></header>
+<div class="announcement">Ujala Store · Quality products, clear prices, easy ordering</div>
+<header><div><div class="brand">✦ Ujala Store</div><div class="tag">Aapki pasand, aapke qareeb</div></div><div class="adminbar"><button id="cartBtn" class="secondary">🛒 Cart <span id="cartCount">0</span></button><span id="userLabel" class="small"></span><button id="loginBtn" class="secondary">Admin Login</button><button id="logoutBtn" class="secondary hidden">Logout</button></div></header>
 <main>
-<section class="hero"><h1>Welcome to Ujala Store</h1><p>Hamari products dekhein, details parhein aur har product ke customer comments explore karein.</p></section>
+<section class="hero"><div><span class="eyebrow">WELCOME TO UJALA</span><h1>Apni pasand ki products, ek hi jagah.</h1><p>Products explore karein, details aur reviews dekhein, aur asani se order place karein.</p><button id="shopNow">Shop Now ↓</button></div><div class="hero-art" aria-hidden="true">✦<span>UJALA<br>STORE</span></div></section>
 <div id="setupNotice" class="notice">Setup required: Firebase config add karne ke baad Gmail login, products aur photo upload kaam karenge. Tareeqa README file mein hai.</div>
 <section id="loginArea" class="panel hidden"><h2>Admin Login</h2><p class="muted">Sirf authorized Gmail account ko product manage karne ki ijazat hogi.</p><div id="authMsg" class="notice hidden"></div><button id="googleLogin">Continue with Google</button></section>
 <section id="adminArea" class="panel hidden">
@@ -36,7 +49,7 @@ label{font-size:13px;font-weight:700;display:block;margin:11px 0 6px}.grid{displ
  <form id="productForm">
  <input id="productId" type="hidden">
  <div class="two"><div><label>Product ka naam *</label><input id="pName" required maxlength="100" placeholder="Misal: Glow Face Cream"></div><div><label>Price (PKR) *</label><input id="pPrice" type="number" min="0" step="1" required placeholder="1500"></div></div>
- <label>Description *</label><textarea id="pDesc" required rows="3" maxlength="3000" placeholder="Product ki details..."></textarea>
+ <label>Category</label><input id="pCategory" maxlength="60" placeholder="Misal: Beauty, Fashion, Home"><label>Description *</label><textarea id="pDesc" required rows="3" maxlength="3000" placeholder="Product ki details..."></textarea>
  <label>Product Photos (multiple select kar sakte hain)</label><input id="pPhoto" type="file" accept="image/*" multiple><div class="filehint">JPG, PNG, WebP — ek se zyada photos select karein. Bari photos browser mein compress hongi; upload Firebase Storage availability par depend karega.</div><div id="photoPreview" class="photo-gallery"></div>
  <div class="row" style="margin-top:14px"><button id="saveProduct" type="submit">Save Product</button><button id="cancelEdit" type="button" class="secondary hidden">Cancel Edit</button></div>
  </form>
@@ -46,10 +59,13 @@ label{font-size:13px;font-weight:700;display:block;margin:11px 0 6px}.grid{displ
  <form id="reviewForm"><input id="reviewProductId" type="hidden"><div class="two"><div><label>Display name</label><input id="rName" required maxlength="70" placeholder="Customer name ya Demo Review"></div><div><label>Rating</label><select id="rRating"><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select></div></div>
  <label>Comment *</label><textarea id="rText" required maxlength="1000" rows="2" placeholder="Comment likhein..."></textarea><label><input id="rDemo" type="checkbox" style="width:auto"> Isay clearly “Demo / Promotional” label karein</label><button type="submit">Add Review / Comment</button></form><div id="reviewAdminList"></div></div>
 </section>
-<section id="publicArea"><div class="row"><h2>Our Products</h2><span id="productCount" class="muted"></span></div><div class="toolbar"><input id="searchBox" placeholder="Product search karein..."></div><div id="publicProducts" class="grid"></div></section>
+<section id="publicArea"><div class="row"><h2>Our Products</h2><span id="productCount" class="muted"></span></div><div class="toolbar"><input id="searchBox" placeholder="Product ya description search karein..."><select id="categoryFilter" aria-label="Category filter"><option value="">All categories</option></select><button id="wishlistBtn" class="secondary">♡ Wishlist <span id="wishlistCount">0</span></button></div>
+<div id="categoryChips" class="chips"></div>
+<div class="store-tools"><span>✓ Clear pricing</span><span>✓ Product details</span><span>✓ Cash on Delivery</span></div><div id="publicProducts" class="grid"></div></section>
 <section id="detailArea" class="panel hidden"></section>
+<section id="cartArea" class="panel hidden"><div class="row"><h2>Your Cart</h2><button id="closeCart" class="secondary">Continue shopping</button></div><div id="cartItems"></div><div class="row"><strong>Subtotal</strong><strong id="cartTotal">Rs. 0</strong></div><h3>Checkout — Cash on Delivery</h3><form id="checkoutForm"><div class="two"><div><label>Full name *</label><input id="checkoutName" required maxlength="100"></div><div><label>Phone / WhatsApp *</label><input id="checkoutPhone" required inputmode="tel" maxlength="25"></div></div><label>Delivery address *</label><textarea id="checkoutAddress" required rows="3" maxlength="500"></textarea><label>Payment method</label><select id="paymentMethod"><option value="Cash on Delivery (COD)">Cash on Delivery (COD)</option><option value="Bank/Easypaisa/JazzCash — contact seller">Bank/Easypaisa/JazzCash (seller confirmation required)</option></select><p class="muted">Online card payment is not enabled. Mobile-wallet/bank transfer is not confirmed until the seller provides official account details.</p><button type="submit" id="placeOrderBtn">Place Order</button><div id="checkoutMsg" class="notice hidden"></div></form></section>
 </main>
-<div class="footer">© <span id="year"></span> Ujala Store</div>
+<div class="footer">✦ Ujala Store <small>Product availability and order confirmation are subject to seller confirmation. Online card payments are not enabled.</small><small>© <span id="year"></span> Ujala Store</small></div>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -76,6 +92,7 @@ $("loginBtn").onclick = () => {
   if (!isConfigured) msg("Firebase config add karna baqi hai. Updated index.html GitHub par publish karein.");
 };
 let app,auth,db,storage,currentUser=null,isAdmin=false,products=[],photoDocs=[],reviews={},stopProducts=null,stopPhotos=null,stopReviews=null,selectedReviewProduct=null;
+let cart=[],wishlist=[],showWishlistOnly=false;
 const escapeHtml = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const money = n => "Rs. "+Number(n||0).toLocaleString("en-PK");
 function show(el,on=true){$(el).classList.toggle("hidden",!on)}
@@ -106,6 +123,25 @@ if(isConfigured){
  $("googleLogin").addEventListener("click",()=>msg("Firebase config abhi add nahi hui. README file follow karein."));
  renderPublic();
 }
+ 
+$("cartBtn").onclick=()=>{show("cartArea",true);renderCart();$("cartArea").scrollIntoView({behavior:"smooth"});};
+$("closeCart").onclick=()=>show("cartArea",false);
+$("shopNow").onclick=()=>$("publicArea").scrollIntoView({behavior:"smooth"});
+$("wishlistBtn").onclick=()=>{showWishlistOnly=!showWishlistOnly;$("wishlistBtn").textContent=showWishlistOnly?"♥ Showing Wishlist · Show All":"♡ Wishlist";renderPublic();};
+$("searchBox").addEventListener("input",renderPublic);
+$("categoryFilter").addEventListener("change",renderPublic);
+$("checkoutForm").addEventListener("submit",async e=>{
+ e.preventDefault();const btn=$("placeOrderBtn");btn.disabled=true;btn.textContent="Submitting...";
+ try{
+  if(!cart.length)throw new Error("Cart empty hai.");
+  if(!db)throw new Error("Store database connect nahi hai.");
+  const items=cart.map(x=>{const p=products.find(y=>y.id===x.id);if(!p)throw new Error("Cart ka ek product ab available nahi.");return {productId:p.id,name:p.name,price:Number(p.price)||0,quantity:x.qty}});
+  const subtotal=items.reduce((s,x)=>s+x.price*x.quantity,0);
+  const order={customerName:$("checkoutName").value.trim(),phone:$("checkoutPhone").value.trim(),address:$("checkoutAddress").value.trim(),items,subtotal,total:subtotal,paymentMethod:$("paymentMethod").value,status:"New",createdAt:serverTimestamp()};
+  await addDoc(collection(db,"orders"),order);cart=[];renderCart();$("checkoutForm").reset();$("checkoutMsg").textContent="Order request submit ho gayi. Seller aap se confirmation ke liye rabta karega.";show("checkoutMsg",true);
+ }catch(err){$("checkoutMsg").textContent="Order submit nahi hua: "+err.message;show("checkoutMsg",true);$("checkoutMsg").classList.add("error")}finally{btn.disabled=false;btn.textContent="Place Order"}
+});
+
 function listenPublicProducts(){
  if(!db){renderPublic();return}
  if(stopProducts)stopProducts();
@@ -157,21 +193,42 @@ async function buyProduct(id){
  }catch(e){console.error(e);alert("Order submit nahi hua: "+e.message+" — Firestore rules mein orders create permission check karein.");}
 }
 
+function toggleWishlist(id){wishlist=wishlist.includes(id)?wishlist.filter(x=>x!==id):[...wishlist,id];renderPublic()}
+function addToCart(id){const p=products.find(x=>x.id===id);if(!p)return;const item=cart.find(x=>x.id===id);if(item)item.qty++;else cart.push({id,qty:1});renderCart();alert("Product cart mein add ho gaya.")}
+function renderCart(){
+ $("cartItems").innerHTML=cart.length?cart.map(x=>{const p=products.find(y=>y.id===x.id);if(!p)return "";return `<div class="cart-line"><div><strong>${escapeHtml(p.name)}</strong><div class="muted">${money(p.price)} each</div></div><input aria-label="Quantity" type="number" min="1" max="99" value="${x.qty}" data-qty="${x.id}"><button class="danger" data-remove-cart="${x.id}">Remove</button></div>`}).join(""):'<p class="muted">Your cart is empty.</p>';
+ const total=cart.reduce((n,x)=>{const p=products.find(y=>y.id===x.id);return n+(Number(p?.price)||0)*x.qty},0);
+ $("cartTotal").textContent=money(total);$("cartCount").textContent=cart.reduce((n,x)=>n+x.qty,0);
+ $("cartItems").querySelectorAll("[data-qty]").forEach(i=>i.onchange=()=>{const x=cart.find(y=>y.id===i.dataset.qty);if(x)x.qty=Math.max(1,Math.min(99,parseInt(i.value||"1",10)));renderCart()});
+ $("cartItems").querySelectorAll("[data-remove-cart]").forEach(b=>b.onclick=()=>{cart=cart.filter(x=>x.id!==b.dataset.removeCart);renderCart()});
+}
 function renderPublic(){
  const term=($("searchBox")?.value||"").toLowerCase();
- const filtered=products.filter(p=>(p.name||"").toLowerCase().includes(term)||(p.description||"").toLowerCase().includes(term));
+ const cat=$("categoryFilter")?.value||"";
+ const source=showWishlistOnly?products.filter(p=>wishlist.includes(p.id)):products;
+ const filtered=source.filter(p=>(!cat||(p.category||"General")===cat)&&((p.name||"").toLowerCase().includes(term)||(p.description||"").toLowerCase().includes(term)));
+ const cats=[...new Set(products.map(p=>p.category||"General"))].sort();
+ const sel=$("categoryFilter"),old=sel.value;
+ sel.innerHTML='<option value="">All categories</option>'+cats.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join("");
+ sel.value=cats.includes(old)?old:"";
+ $("categoryChips").innerHTML='<button class="chip '+(!cat?'active':'')+'" data-cat="">All</button>'+cats.map(c=>`<button class="chip ${cat===c?'active':''}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join("");
+ $("categoryChips").querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>{sel.value=b.dataset.cat;renderPublic()});
  $("productCount").textContent=filtered.length+" products";
- $("publicProducts").innerHTML=filtered.length?filtered.map(p=>`<article class="card"><img class="photo" src="${escapeHtml((p.photoURLs?.[0]||p.photoURL||defaultPhoto()))}" alt="${escapeHtml(p.name)}"><div class="cardbody"><div class="price">${money(p.price)}</div><h3>${escapeHtml(p.name)}</h3><p class="muted">${escapeHtml((p.description||"").slice(0,105))}${(p.description||"").length>105?"…":""}</p><button data-detail="${p.id}">View Product & Reviews</button></div></article>`).join(""):'<p class="muted">Abhi koi product add nahi hua.</p>';
+ $("publicProducts").innerHTML=filtered.length?filtered.map(p=>`<article class="card"><img class="photo" src="${escapeHtml((p.photoURLs?.[0]||p.photoURL||defaultPhoto()))}" alt="${escapeHtml(p.name)}"><div class="cardbody"><div class="row"><span class="muted">${escapeHtml(p.category||"General")}</span><button class="heart" data-wish="${p.id}" title="Wishlist">${wishlist.includes(p.id)?"♥":"♡"}</button></div><div class="price">${money(p.price)}</div><h3>${escapeHtml(p.name)}</h3><p class="muted">${escapeHtml((p.description||"").slice(0,105))}${(p.description||"").length>105?"…":""}</p><div class="row" style="margin-top:12px"><button data-detail="${p.id}">Quick View</button><button class="secondary" data-addcart="${p.id}">Add to Cart</button></div></div></article>`).join(""):'<p class="muted">Abhi is category mein products available nahi hain.</p>';
  $("publicProducts").querySelectorAll("[data-detail]").forEach(b=>b.onclick=()=>openDetail(b.dataset.detail));
+ $("publicProducts").querySelectorAll("[data-wish]").forEach(b=>b.onclick=()=>toggleWishlist(b.dataset.wish));
+ $("publicProducts").querySelectorAll("[data-addcart]").forEach(b=>b.onclick=()=>addToCart(b.dataset.addcart));
+ $("cartCount").textContent=cart.reduce((n,x)=>n+x.qty,0);
+ $("wishlistCount").textContent=wishlist.length;
 }
-$("searchBox").addEventListener("input",renderPublic);
+
 function renderAdminProducts(){
  $("adminProducts").innerHTML=products.length?products.map(p=>`<article class="card"><img class="photo" src="${escapeHtml((p.photoURLs?.[0]||p.photoURL||defaultPhoto()))}"><div class="cardbody"><b>${escapeHtml(p.name)}</b><div class="price">${money(p.price)}</div><div class="muted">${escapeHtml((p.description||"").slice(0,85))}</div><div class="row" style="margin-top:12px"><button class="secondary" data-edit="${p.id}">Edit</button><button class="secondary" data-reviews="${p.id}">Reviews</button><button class="danger" data-remove="${p.id}">Remove</button></div></div></article>`).join(""):'<p class="muted">Abhi products nahi hain.</p>';
  $("adminProducts").querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editProduct(b.dataset.edit));
  $("adminProducts").querySelectorAll("[data-reviews]").forEach(b=>b.onclick=()=>manageReviews(b.dataset.reviews));
  $("adminProducts").querySelectorAll("[data-remove]").forEach(b=>b.onclick=()=>removeProduct(b.dataset.remove));
 }
-function resetProductForm(){$("productForm").reset();$("photoPreview").innerHTML="";$("productId").value="";$("formTitle").textContent="Naya Product Add Karein";$("saveProduct").textContent="Save Product";show("cancelEdit",false)}
+function resetProductForm(){$("productForm").reset();$("pCategory").value="";$("photoPreview").innerHTML="";$("productId").value="";$("formTitle").textContent="Naya Product Add Karein";$("saveProduct").textContent="Save Product";show("cancelEdit",false)}
 function editProduct(id){const p=products.find(x=>x.id===id);if(!p)return;$("productId").value=id;$("pName").value=p.name||"";$("pPrice").value=p.price||0;$("pDesc").value=p.description||"";$("formTitle").textContent="Product Edit Karein";$("saveProduct").textContent="Update Product";show("cancelEdit",true);window.scrollTo({top:0,behavior:"smooth"})}
 $("cancelEdit").onclick=resetProductForm;
 
@@ -205,7 +262,7 @@ $("productForm").addEventListener("submit",async e=>{
   const id=$("productId").value;
   const existing=products.find(p=>p.id===id);
   let photoURLs=Array.isArray(existing?.photoURLs)?[...existing.photoURLs]:(existing?.photoURL?[existing.photoURL]:[]);
-  const data={name:$("pName").value.trim(),price:Number($("pPrice").value),description:$("pDesc").value.trim(),photoURL:photoURLs[0]||"",photoURLs,updatedAt:serverTimestamp()};
+  const data={name:$("pName").value.trim(),price:Number($("pPrice").value),description:$("pDesc").value.trim(),category:$("pCategory").value.trim()||"General",photoURL:photoURLs[0]||"",photoURLs,updatedAt:serverTimestamp()};
   let productId=id;
   if(id) await setDoc(doc(db,"products",id),data,{merge:true});
   else {const created=await addDoc(collection(db,"products"),{...data,createdAt:serverTimestamp()});productId=created.id;}

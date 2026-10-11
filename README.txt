@@ -34,3 +34,10 @@ PHOTO UPLOAD + CHECKOUT:
 
 
 BUG FIX: Declared photoDocs and stopPhotos state variables that were referenced by photo listeners but missing from the app state declaration. That ReferenceError could stop product/photo rendering. Public listener errors now display on the page.
+
+PROFESSIONAL STORE FEATURES:
+- Responsive hero/header, product search, category filter/chips, wishlist, quick view, cart quantity controls, and COD checkout.
+- Category is editable on each product in admin form.
+- Checkout records customer orders in Firestore. Publish the included firestore.rules or order/photo writes will be denied.
+- COD is the only ready-to-use payment collection flow. Bank/mobile-wallet option is marked seller-confirmation-required; no online card gateway is configured. For live online payments, integrate a supported Pakistan merchant gateway using server-side verification and real merchant credentials.
+- For photo upload without Firebase Storage, compressed photos are stored as separate Firestore productPhotos records under the Firestore document size limit. This is limited by Firestore quotas and is not unlimited image hosting.
