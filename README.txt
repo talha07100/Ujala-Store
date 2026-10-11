@@ -11,8 +11,10 @@ UJALA STORE - FIXED BUILD
 Fix in this build: duplicate renderPublic() declaration removed; duplicate declaration could stop the module JavaScript from running, leaving the setup banner visible and buttons unresponsive.
 
 
-IMPORTANT FIX IN THIS VERSION:
-- Fixed the JavaScript initialization order: the original file called $() before declaring const $, which stopped the entire script and made Admin Login appear unresponsive.
-- After uploading this index.html, commit the change and hard-refresh the live site (Ctrl+Shift+R).
-- Login uses Google popup and only the Gmail in index.html (OWNER_EMAIL) is allowed to manage products.
-- Product image uploads still require Firebase Storage to be enabled for the project; if Firebase asks for a billing-plan upgrade, image upload will not work on the current plan.
+FINAL RUNTIME FIX:
+- Fixed the initialization-order bug that referenced $() before declaring const $.
+  This caused a JavaScript ReferenceError before any buttons or Firebase listeners could run.
+- Firebase initialization errors are now shown in the setup notice and browser console.
+- After uploading this index.html to GitHub, commit the change and hard-refresh the published site with Ctrl+Shift+R.
+- Admin Gmail is talhakhan14746@gmail.com. Reviews marked Demo / Promotional must remain clearly labelled and must not be represented as genuine customer reviews.
+- Image upload depends on Firebase Storage being enabled and available for this Firebase project. If Firebase requires a billing upgrade, image upload cannot work until that service is enabled or an alternative image host is configured.

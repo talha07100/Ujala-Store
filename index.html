@@ -70,7 +70,7 @@ const isConfigured = firebaseConfig.apiKey !== "PASTE_API_KEY" && firebaseConfig
 const $ = id => document.getElementById(id);
 $("year").textContent = new Date().getFullYear();
 
-// Keep Admin Login responsive even if Firebase initialization/configuration fails.
+// Login button setup must happen only after the $ helper is initialized.
 $("loginBtn").onclick = () => {
   show("loginArea", true);
   if (!isConfigured) msg("Firebase config add karna baqi hai. Updated index.html GitHub par publish karein.");
@@ -85,7 +85,7 @@ if(isConfigured){
  try{
   app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app);storage=getStorage(app);
   $("setupNotice").classList.add("hidden");
-  $("loginBtn").addEventListener("click",()=>{show("loginArea",true); $("loginArea").scrollIntoView({behavior:"smooth",block:"center"});});
+  $("loginBtn").addEventListener("click",()=>{show("loginArea",true);$("loginArea").scrollIntoView({behavior:"smooth",block:"center"});});
   $("googleLogin").addEventListener("click",async()=>{try{await signInWithPopup(auth,new GoogleAuthProvider())}catch(e){msg("Login error: "+e.message,"error")}});
   $("logoutBtn").addEventListener("click",()=>signOut(auth));
   onAuthStateChanged(auth,user=>{
